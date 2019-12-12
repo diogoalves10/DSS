@@ -1,18 +1,17 @@
-import java.util.HashMap;
-
 public class User {
 
 	private String name;
 	private String email;
 	private String password;
-	//private HashMap <String, Music> HMM;
-	//private HashMap <String, Video> HMV;
+	private boolean admin;
 	
 	
-	public User (String name, String email, String password) {
+	
+	public User (String name, String email, String password, boolean admin) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
+		this.admin = admin;
 	}
 	
 	public String get_name () {
@@ -40,29 +39,13 @@ public class User {
 		this.password = password;
 	}
 	
-    //not sure em relacao a isto
-	/* public void change_name (String new_name) {
+	public void to_string () {
+		StringBuilder sb = new StringBuilder ();
+		sb.append("Nome: " + this.get_name() + "\n");
+		sb.append("Email: " + this.get_email() + "\n");
+		sb.append("Password: " + this.get_password() + "\n");
 		
-		if (new_name == this.name) 
-			System.out.println("Nome introduzido inválido");
-		
-		else this.set_name(new_name);
+		System.out.println(sb);
 	}
 	
-	public void change_email (String new_email) {
-		
-		if (new_email == this.email) 
-			System.out.println("Email introduzido inválido");
-		
-		else this.set_email(new_email);
-	}
-	
-	public void change_password (String new_password) {
-		
-		if (new_password == this.password) 
-			System.out.println("Password introduzida inválida");
-		
-		else this.set_password(new_password); 
-	} */
-	
-}
+}	
