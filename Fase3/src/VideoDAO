@@ -1,0 +1,118 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+public class VideoDAO {
+	
+	private Connection connection;
+	private Statement statement;
+	private ArrayList <Video> lista_videos;
+	
+	public VideoDAO () throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
+		this.connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/1?autoReconnect=true&useSSL=false", "root", "7654JprG");
+		this.lista_videos = new ArrayList <Video> ();
+		
+	}
+	
+	//cria a tabela dos videos
+	public void init () {
+		try {
+			this.statement = this.connection.createStatement();
+			String sql = "CREATE TABLE VIDEO" + 
+					 "(id INTEGER not NULL, " +
+					 " name VARCHAR (255), " +
+					 " categoria VARCHAR (255), " +
+					 " PRIMARY KEY (id))";
+			
+			this.statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//preenche a tabela com os videos que ja existem
+	public void fillVideoTable () throws SQLException {
+		String sql = null;
+		for (Video video: this.lista_videos) {
+			sql = "INSERT INTO VIDEO (id, name, categoria)"
+					 + "VALUES (?, ?, ?)";
+			
+			PreparedStatement p_statement = this.connection.prepareStatement(sql);
+			p_statement.setInt(1,video.get_id());
+			p_statement.setString(2,video.get_name());
+			p_statement.setString(3, video.get_categoria());
+			p_statement.executeUpdate();
+			
+			p_statement.close();
+		}
+	}
+	
+	//devolve os videos todos para um ArrayList
+	public ArrayList <Video> devolveVideos () throws SQLException {
+			
+		Video novo = null;
+		String sql = "SELECT id, name, categoria FROM VIDEO ";
+			
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		ResultSet rs = p_statement.executeQuery(sql);
+			
+		while (rs.next()) {
+			novo = new Video (rs.getInt("id"), rs.getString("name"), rs.getString("categoria"));
+			this.lista_videos.add(novo);
+		}
+		
+		for (Video video: this.lista_videos)
+			video.to_String();
+		
+		p_statement.close();
+		return this.lista_videos;
+			
+	}
+	
+	//atualiza a categoria de um video
+	public void updateVideo (int id, String categoria) throws SQLException {
+			
+		String sql = "update VIDEO set categoria=? where id=?";
+		
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setString(1, categoria);
+		p_statement.setInt(2, id);
+		p_statement.executeUpdate();
+			
+		p_statement.close();
+			
+	}
+	
+	//adiciona uma música à tabela
+	public void addVideo (Video v) throws SQLException {
+		String sql = null;
+		sql = "INSERT INTO VIDEO (id, name, categoria)"
+				+ "Values (?,?,?)";
+			
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setInt(1,v.get_id());
+		p_statement.setString(2,v.get_name());
+		p_statement.setString(3,v.get_categoria());
+		p_statement.executeUpdate();
+			
+		p_statement.close();
+	}
+	
+	//remove um video da tabela
+	public void removeVideo (Video v) throws SQLException {
+		String sql = null;
+		sql = "DELETE FROM VIDEO where id = ?";
+			
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setInt(1, v.get_id());
+		p_statement.executeUpdate();
+			
+		p_statement.close();
+	}
+	
+}
