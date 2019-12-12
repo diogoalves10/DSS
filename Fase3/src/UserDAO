@@ -15,15 +15,23 @@ public class UserDAO {
 		
 	}
 	
+	//cria a tabela para os users
+		 public void init () {
+			try {
+				this.statement = this.connection.createStatement();
+				String sql = "CREATE TABLE USERS" + 
+						 "(name VARCHAR (255), " + 
+						 " email VARCHAR (255), " +
+						 " password VARCHAR (255), " + 
+						 " PRIMARY KEY (email))";
+				
+				this.statement.executeUpdate(sql);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	
-	
-	//cria a lista de users
-	public void createUsers (ArrayList <User> users) {
-		for (User user: users) 
-			this.lista_users.add(user);
-	}
-
-	//preenche a tabela com os users que ja existem
+	//preenche a tabela com os users
 	public void fillUsersTable () throws SQLException {
 		String sql = null;
 		for (User user: this.lista_users) {
@@ -40,7 +48,7 @@ public class UserDAO {
 		}
 	}
 	
-	//devolve os users
+	//devolve os users para um arrayList
 	public ArrayList <User> devolveUsers () throws SQLException {
 		
 		User novo = null;
@@ -65,6 +73,7 @@ public class UserDAO {
 		}
 	
 	
+	//atualiza os dados de um user
 	public void updateUser (String email, String change, int coluna) throws SQLException {
 		
 		String sql = null;
@@ -116,34 +125,4 @@ public class UserDAO {
 		
 		p_statement.close();
 	}
-	
-	//cria a tabela para os users
-	 public void init () {
-		try {
-			this.statement = this.connection.createStatement();
-			String sql = "CREATE TABLE USERS" + 
-					 "(name VARCHAR (255), " + 
-					 " email VARCHAR (255), " +
-					 " password VARCHAR (255), " + 
-					 " PRIMARY KEY (email))";
-			
-			this.statement.executeUpdate(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	 
-	public static void main (String args []) throws ClassNotFoundException, SQLException {
-		UserDAO user = new UserDAO();
-		ArrayList <User> users;
-		//User Joao = new User ("João", "joao@gmail.com", "1234", false);
-		//User Diogo = new User ("Diogo", "diogo@gmail.com", "5678", false);
-		//user.lista_users.add(Joao);
-		//user.lista_users.add(Diogo);
-		//user.init();
-		//user.fillUsersTable();
-		//users = user.devolveUsers();
-		
-	}
-	
 }
