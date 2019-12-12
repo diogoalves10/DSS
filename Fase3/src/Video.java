@@ -1,16 +1,19 @@
 public class Video {
 
+	private int id;
 	private String name;
 	private String categoria;
-	private String filename;
 	
-	
-	public Video (String name, String categoria, String filename) {
+	public Video (int id, String name, String categoria) {
+		this.id = id;
 		this.name = name;
 		this.categoria = categoria;
-		this.filename = filename;
+
 	}
 	
+	public int get_id () {
+		return this.id;
+	}
 	
 	public String get_name () {
 		return this.name;
@@ -19,11 +22,7 @@ public class Video {
 	public String get_categoria () {
 		return this.categoria;
 	}
-	
-	public String get_filename () {
-		return this.filename;
-	}
-	
+
 	
 	public void set_name (String new_name) {
 		this.name = new_name;
