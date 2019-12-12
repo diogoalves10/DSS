@@ -1,26 +1,19 @@
-import java.text.SimpleDateFormat;
-import java.util.GregorianCalendar;
-
 public class Music {
 
+	private int id;
 	private String name;
 	private String singer;
 	private String categoria;
 	private int ordem_album;
-	private GregorianCalendar data_lancamento;
-	private String filename;
 	
 	
-	public Music (String name, String singer, String categoria, int ordem_album, int year, int month, int day, String filename) {
+	public Music (int music_id, String name, String singer, String categoria, int ordem_album) {
+		this.id = music_id;
 		this.name = name;
 		this.singer = singer;
 		this.categoria = categoria;
 		this.ordem_album = ordem_album;
-		this.data_lancamento = new GregorianCalendar (year, month, day);
-		this.filename = filename;
 	}
-	
-	
 	
 	public String get_name () {
 		return this.name;
@@ -38,14 +31,9 @@ public class Music {
 		return this.ordem_album;
 	}
 	
-	public GregorianCalendar get_data () {
-		return this.data_lancamento;
+	public int get_musicID () {
+		return this.id;
 	}
-	
-	public String get_filename () {
-		return this.filename;
-	}
-	
 	
 	public void set_name (String new_name) {
 		this.name = new_name;
@@ -63,18 +51,12 @@ public class Music {
 		this.ordem_album = ordem;
 	}
 	
-	public void set_data (int year, int month, int day) {
-		this.data_lancamento = new GregorianCalendar (year, month, day);
-	}
-	
 	
 	public void to_String () {
 		StringBuilder sb = new StringBuilder ();
 		sb.append("Música: " + this.get_name() 	+ "\n");
 		sb.append("Autor: " + this.get_singer() + "\n");
 		sb.append("Categoria: " + this.get_categoria() + "\n");
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd");	
-		sb.append("Data de lançamento: " + sdf.format(data_lancamento.getTime()) + "\n");
 		
 		System.out.println(sb);
 		
