@@ -1,22 +1,19 @@
-import java.util.ArrayList;
+public class Music {
 
-public class Album {
-
+	private int id;
 	private String name;
 	private String singer;
 	private String categoria;
-	private int size;
-	private ArrayList<Music> lista_musicas;
+	private int ordem_album;
 	
 	
-	public Album (String name, String singer, String categoria, int size) {
+	public Music (int music_id, String name, String singer, String categoria, int ordem_album) {
+		this.id = music_id;
 		this.name = name;
 		this.singer = singer;
 		this.categoria = categoria;
-		this.size = size;
-		this.lista_musicas = new ArrayList <Music> (this.size);
+		this.ordem_album = ordem_album;
 	}
-	
 	
 	public String get_name () {
 		return this.name;
@@ -28,6 +25,14 @@ public class Album {
 	
 	public String get_categoria () {
 		return this.categoria;
+	}
+	
+	public int get_ordemAlbum () {
+		return this.ordem_album;
+	}
+	
+	public int get_musicID () {
+		return this.id;
 	}
 	
 	public void set_name (String new_name) {
@@ -42,10 +47,14 @@ public class Album {
 		this.categoria = new_categoria;
 	}
 	
+	public void set_ordemAlbum (int ordem) {
+		this.ordem_album = ordem;
+	}
+	
 	
 	public void to_String () {
 		StringBuilder sb = new StringBuilder ();
-		sb.append("Album: " + this.get_name() 	+ "\n");
+		sb.append("Música: " + this.get_name() 	+ "\n");
 		sb.append("Autor: " + this.get_singer() + "\n");
 		sb.append("Categoria: " + this.get_categoria() + "\n");
 		

@@ -1,0 +1,128 @@
+import java.sql.*;
+import java.util.ArrayList;
+
+public class UserDAO {
+	
+	private Connection connection;
+	private Statement statement;
+	private ArrayList <User> lista_users;
+	
+
+	public UserDAO () throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
+		this.connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/1?autoReconnect=true&useSSL=false", "root", "7654JprG");
+		this.lista_users = new ArrayList <User> ();
+		
+	}
+	
+	//cria a tabela para os users
+		 public void init () {
+			try {
+				this.statement = this.connection.createStatement();
+				String sql = "CREATE TABLE USERS" + 
+						 "(name VARCHAR (255), " + 
+						 " email VARCHAR (255), " +
+						 " password VARCHAR (255), " + 
+						 " PRIMARY KEY (email))";
+				
+				this.statement.executeUpdate(sql);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	
+	//preenche a tabela com os users
+	public void fillUsersTable () throws SQLException {
+		String sql = null;
+		for (User user: this.lista_users) {
+			sql = "INSERT INTO USERS (name, email, password)"
+					 + "VALUES (?, ?, ?)";
+			
+			PreparedStatement p_statement = this.connection.prepareStatement(sql);
+			p_statement.setString(1,user.get_name());
+			p_statement.setString(2,user.get_email());
+			p_statement.setString(3,user.get_password());
+			p_statement.executeUpdate();
+			
+			p_statement.close();
+		}
+	}
+	
+	//devolve os users para um arrayList
+	public ArrayList <User> devolveUsers () throws SQLException {
+		
+		User novo = null;
+		String sql = "SELECT name, email, password FROM USERS ";
+		
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		ResultSet rs = p_statement.executeQuery(sql);
+		
+		while (rs.next()) {
+			novo = new User (rs.getString("name"), rs.getString("email"), rs.getString("password"), false);
+			this.lista_users.add(novo);
+		}
+		
+		for (User e: this.lista_users)
+			e.to_string();
+		
+		p_statement.close();
+		return this.lista_users;
+		
+		
+	 
+		}
+	
+	
+	//atualiza os dados de um user
+	public void updateUser (String email, String change, int coluna) throws SQLException {
+		
+		String sql = null;
+		
+		if (coluna == 0) {
+			sql = "update USERS set name=? where email=?";
+		}
+		
+		else if (coluna == 1) {
+			sql = "update USERS set email=? where email=?";
+		}
+		
+		else {
+			sql = "update USERS set password=? where email=?";
+		}
+		
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setString(1, change);
+		p_statement.setString(2, email);
+		p_statement.executeUpdate();
+		
+		p_statement.close();
+		
+	}
+	
+	//adiciona um user à tabela
+	public void addUser (User e) throws SQLException {
+		String sql = null;
+		sql = "INSERT INTO USERS (name, email, password)"
+				+ "Values (?,?,?)";
+		
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setString(1,e.get_name());
+		p_statement.setString(2,e.get_email());
+		p_statement.setString(3,e.get_password());
+		p_statement.executeUpdate();
+		
+		p_statement.close();
+	}
+	
+	//remove um user da tabela
+	public void removeUser (User e) throws SQLException {
+		String sql = null;
+		sql = "DELETE FROM USERS where email = ?";
+		
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setString(1, e.get_email());
+		p_statement.executeUpdate();
+		
+		p_statement.close();
+	}
+}

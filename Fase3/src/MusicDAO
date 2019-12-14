@@ -1,0 +1,128 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+
+public class MusicDAO {
+	
+	private Connection connection;
+	private Statement statement;
+	private ArrayList <Music> lista_musicas;
+	
+	public MusicDAO () throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
+		this.connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/1?autoReconnect=true&useSSL=false", "root", "7654JprG");
+		this.lista_musicas = new ArrayList <Music> ();
+		
+	}
+	
+	//cria a tabela das musicas 
+	public void init () {
+		try {
+			this.statement = this.connection.createStatement();
+			String sql = "CREATE TABLE MUSIC" + 
+					 "(id INTEGER not NULL, " +
+					 " name VARCHAR (255), " +
+					 " singer VARCHAR (255), " +
+					 " categoria VARCHAR (255), " +
+					 " ordem_album INTEGER not NULL, " +
+					 " PRIMARY KEY (id))";
+			
+			this.statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+		
+	//preenche a tabela com as musicas que ja existem
+	public void fillMusicTable () throws SQLException {
+		String sql = null;
+		for (Music musica: this.lista_musicas) {
+			sql = "INSERT INTO MUSIC (id, name, singer, categoria, ordem_album)"
+					 + "VALUES (?, ?, ?, ?, ?)";
+			
+			PreparedStatement p_statement = this.connection.prepareStatement(sql);
+			p_statement.setInt(1, musica.get_musicID());
+			p_statement.setString(2,musica.get_name());
+			p_statement.setString(3,musica.get_singer());
+			p_statement.setString(4,musica.get_categoria());
+			p_statement.setInt(5,musica.get_ordemAlbum());
+			p_statement.executeUpdate();
+			
+			p_statement.close();
+		}
+	}
+	
+	//devolve as musicas todas para um ArrayList
+	public ArrayList <Music> devolveMusicas () throws SQLException {
+			
+		Music nova = null;
+		String sql = "SELECT id, name, singer, categoria, ordem_album FROM MUSIC ";
+			
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		ResultSet rs = p_statement.executeQuery(sql);
+			
+		while (rs.next()) {
+			nova = new Music (rs.getInt("id"), rs.getString("name"), rs.getString("singer"), rs.getString("categoria"), rs.getInt("ordem_album"));
+			this.lista_musicas.add(nova);
+		}
+		
+		for (Music musica: this.lista_musicas)
+			musica.to_String();
+		
+		p_statement.close();
+		return this.lista_musicas;
+			
+	}
+	
+	//atualiza a categoria de uma musica
+	public void updateMusic (int id, String categoria) throws SQLException {
+			
+		String sql = "update MUSIC set categoria=? where id=?";
+		
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setString(1, categoria);
+		p_statement.setInt(2, id);
+		p_statement.executeUpdate();
+			
+		p_statement.close();
+			
+	}
+	
+	//adiciona uma música à tabela
+	public void addMusic (Music m) throws SQLException {
+		String sql = null;
+		sql = "INSERT INTO MUSIC (id, name, singer, categoria, ordem_album)"
+				+ "Values (?,?,?, ?, ?)";
+			
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setInt(1,m.get_musicID());
+		p_statement.setString(2,m.get_name());
+		p_statement.setString(3,m.get_singer());
+		p_statement.setString(4,m.get_categoria());
+		p_statement.setInt(5,m.get_ordemAlbum());
+		p_statement.executeUpdate();
+			
+		p_statement.close();
+	}
+	
+	//remove uma musica da tabela
+	public void removeMusic (Music m) throws SQLException {
+		String sql = null;
+		sql = "DELETE FROM MUSIC where id = ?";
+			
+		PreparedStatement p_statement = this.connection.prepareStatement(sql);
+		p_statement.setInt(1, m.get_musicID());
+		p_statement.executeUpdate();
+			
+		p_statement.close();
+	}
+	
+	
+	
+	
+}
