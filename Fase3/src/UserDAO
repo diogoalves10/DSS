@@ -11,70 +11,56 @@ public class UserDAO {
 	public UserDAO () throws SQLException, ClassNotFoundException {
 		Class.forName("com.mysql.jdbc.Driver");
 		this.connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/1?autoReconnect=true&useSSL=false", "root", "7654JprG");
-		this.lista_users = new ArrayList <User> ();
 		
 	}
 	
 	//cria a tabela para os users
-		 public void init () {
-			try {
-				this.statement = this.connection.createStatement();
-				String sql = "CREATE TABLE USERS" + 
-						 "(name VARCHAR (255), " + 
-						 " email VARCHAR (255), " +
-						 " password VARCHAR (255), " + 
-						 " PRIMARY KEY (email))";
-				
-				this.statement.executeUpdate(sql);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	
-	//preenche a tabela com os users
-	public void fillUsersTable () throws SQLException {
-		String sql = null;
-		for (User user: this.lista_users) {
-			sql = "INSERT INTO USERS (name, email, password)"
-					 + "VALUES (?, ?, ?)";
-			
+	public void init () {
+		try {									
+			String sql = "SET GLOBAL max_allowed_packet=?";
 			PreparedStatement p_statement = this.connection.prepareStatement(sql);
-			p_statement.setString(1,user.get_name());
-			p_statement.setString(2,user.get_email());
-			p_statement.setString(3,user.get_password());
+			p_statement.setInt(1, 80540528);
 			p_statement.executeUpdate();
 			
-			p_statement.close();
+			this.statement = this.connection.createStatement();
+				sql = "CREATE TABLE USERS" + 
+					 "(name VARCHAR (255), " + 
+					 " email VARCHAR (255), " +
+					 " password VARCHAR (255)) ";
+				
+			this.statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 	}
 	
-	//devolve os users para um arrayList
-	public ArrayList <User> devolveUsers () throws SQLException {
-		
-		User novo = null;
-		String sql = "SELECT name, email, password FROM USERS ";
-		
+	public boolean logIn (String user_email, String user_password) throws SQLException {
+		boolean sucess = false;
+		String sql = "SELECT * FROM USERS WHERE email=?";
 		PreparedStatement p_statement = this.connection.prepareStatement(sql);
-		ResultSet rs = p_statement.executeQuery(sql);
+		p_statement.setString(1, user_email);
+		ResultSet rs = p_statement.executeQuery();
 		
 		while (rs.next()) {
-			novo = new User (rs.getString("name"), rs.getString("email"), rs.getString("password"), false);
-			this.lista_users.add(novo);
-		}
-		
-		for (User e: this.lista_users)
-			e.to_string();
-		
+			String check = rs.getString("password");
+			System.out.println(check);
+			if (check.equals(user_password)) {
+				sucess = true;
+			}
+			
+		}		
+		System.out.println (sucess);
 		p_statement.close();
-		return this.lista_users;
+		return sucess;
 		
+	}
+	
 		
-	 
-		}
-	
-	
+		 
+		 
+		 
 	//atualiza os dados de um user
-	public void updateUser (String email, String change, int coluna) throws SQLException {
+	public void updateUser (User user, String change, int coluna) throws SQLException {
 		
 		String sql = null;
 		
@@ -92,8 +78,9 @@ public class UserDAO {
 		
 		PreparedStatement p_statement = this.connection.prepareStatement(sql);
 		p_statement.setString(1, change);
-		p_statement.setString(2, email);
+		p_statement.setString(2, user.get_email());
 		p_statement.executeUpdate();
+		
 		
 		p_statement.close();
 		
@@ -125,4 +112,6 @@ public class UserDAO {
 		
 		p_statement.close();
 	}
+	
+	
 }
