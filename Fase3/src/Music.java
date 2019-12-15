@@ -4,15 +4,18 @@ public class Music {
 	private String name;
 	private String singer;
 	private String categoria;
+	private String album;
 	private int ordem_album;
 	
 	
-	public Music (int music_id, String name, String singer, String categoria, int ordem_album) {
+	public Music (int music_id, String name, String singer, String categoria, String album, int ordem_album) {
 		this.id = music_id;
 		this.name = name;
 		this.singer = singer;
 		this.categoria = categoria;
+		this.album = album;
 		this.ordem_album = ordem_album;
+		
 	}
 	
 	public String get_name () {
@@ -27,6 +30,10 @@ public class Music {
 		return this.categoria;
 	}
 	
+	public String get_album () {
+		return this.album;
+	}
+	
 	public int get_ordemAlbum () {
 		return this.ordem_album;
 	}
@@ -34,6 +41,7 @@ public class Music {
 	public int get_musicID () {
 		return this.id;
 	}
+	
 	
 	public void set_name (String new_name) {
 		this.name = new_name;
