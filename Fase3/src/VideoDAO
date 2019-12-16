@@ -1,3 +1,16 @@
+
+import java.awt.Rectangle;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -6,20 +19,27 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import javax.print.attribute.standard.Media;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.swing.JFrame;
+
+import com.sun.media.MediaPlayer;
+
+import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
+
 public class VideoDAO {
 	
 	private Connection connection;
 	private Statement statement;
-	private ArrayList <Video> lista_videos;
 	
 	public VideoDAO () throws SQLException, ClassNotFoundException {
 		Class.forName("com.mysql.jdbc.Driver");
 		this.connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/1?autoReconnect=true&useSSL=false", "root", "7654JprG");
-		this.lista_videos = new ArrayList <Video> ();
-		
 	}
 	
-	//cria a tabela dos videos
+	//cria a tabela dos videos 
 	public void init () {
 		try {
 			this.statement = this.connection.createStatement();
@@ -27,7 +47,7 @@ public class VideoDAO {
 					 "(id INTEGER not NULL, " +
 					 " name VARCHAR (255), " +
 					 " categoria VARCHAR (255), " +
-					 " PRIMARY KEY (id))";
+					 " file longblob ) ";
 			
 			this.statement.executeUpdate(sql);
 		} catch (SQLException e) {
@@ -35,78 +55,28 @@ public class VideoDAO {
 		}
 	}
 	
-	//preenche a tabela com os videos que ja existem
-	public void fillVideoTable () throws SQLException {
-		String sql = null;
-		for (Video video: this.lista_videos) {
-			sql = "INSERT INTO VIDEO (id, name, categoria)"
-					 + "VALUES (?, ?, ?)";
-			
+	//adiciona um video à tabela
+		public void upload (Video v, String file_path) throws SQLException, FileNotFoundException {
+			String sql = null;
+			sql = "INSERT INTO VIDEO (id, name, categoria, file)"
+					+ "Values (?, ?, ?, ?)";
+				
 			PreparedStatement p_statement = this.connection.prepareStatement(sql);
-			p_statement.setInt(1,video.get_id());
-			p_statement.setString(2,video.get_name());
-			p_statement.setString(3, video.get_categoria());
-			p_statement.executeUpdate();
+			InputStream inputStream = new FileInputStream(new File(file_path));
 			
+			p_statement.setInt(1,v.get_id());
+			p_statement.setString(2,v.get_name());
+			p_statement.setString(3,v.get_categoria());
+			p_statement.setBlob(4, inputStream);
+			p_statement.executeUpdate();
+				
 			p_statement.close();
 		}
-	}
-	
-	//devolve os videos todos para um ArrayList
-	public ArrayList <Video> devolveVideos () throws SQLException {
-			
-		Video novo = null;
-		String sql = "SELECT id, name, categoria FROM VIDEO ";
-			
-		PreparedStatement p_statement = this.connection.prepareStatement(sql);
-		ResultSet rs = p_statement.executeQuery(sql);
-			
-		while (rs.next()) {
-			novo = new Video (rs.getInt("id"), rs.getString("name"), rs.getString("categoria"));
-			this.lista_videos.add(novo);
-		}
-		
-		for (Video video: this.lista_videos)
-			video.to_String();
-		
-		p_statement.close();
-		return this.lista_videos;
-			
-	}
-	
-	//atualiza a categoria de um video
-	public void updateVideo (int id, String categoria) throws SQLException {
-			
-		String sql = "update VIDEO set categoria=? where id=?";
-		
-		PreparedStatement p_statement = this.connection.prepareStatement(sql);
-		p_statement.setString(1, categoria);
-		p_statement.setInt(2, id);
-		p_statement.executeUpdate();
-			
-		p_statement.close();
-			
-	}
-	
-	//adiciona uma música à tabela
-	public void addVideo (Video v) throws SQLException {
-		String sql = null;
-		sql = "INSERT INTO VIDEO (id, name, categoria)"
-				+ "Values (?,?,?)";
-			
-		PreparedStatement p_statement = this.connection.prepareStatement(sql);
-		p_statement.setInt(1,v.get_id());
-		p_statement.setString(2,v.get_name());
-		p_statement.setString(3,v.get_categoria());
-		p_statement.executeUpdate();
-			
-		p_statement.close();
-	}
-	
+
 	//remove um video da tabela
 	public void removeVideo (Video v) throws SQLException {
 		String sql = null;
-		sql = "DELETE FROM VIDEO where id = ?";
+		sql = "DELETE FROM VIDEO where id =?";
 			
 		PreparedStatement p_statement = this.connection.prepareStatement(sql);
 		p_statement.setInt(1, v.get_id());
@@ -114,5 +84,38 @@ public class VideoDAO {
 			
 		p_statement.close();
 	}
+	
+	public void playVideo(int video_id) throws IOException, SQLException {
+		
+		InputStream is;
+		String sql = null;
+		PreparedStatement p_statement;
+		
+		sql = "SELECT file FROM VIDEO where id=?";
+		p_statement = this.connection.prepareStatement(sql);
+		p_statement.setInt(1, video_id);
+		ResultSet rs = p_statement.executeQuery();
+		rs.next();
+		is = rs.getBinaryStream("file");
+		
+		
+		File file = new File ("video");
+		Files.copy(is, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		
+		EmbeddedMediaPlayerComponent component = new EmbeddedMediaPlayerComponent();
+		 JFrame f = new JFrame ();
+		 f.setContentPane(component);
+		 f.setBounds(new Rectangle (200,200,800,600));
+		 f.addWindowListener(new WindowAdapter() {
+			 public void windowClosing (WindowEvent e) {
+				 component.release();
+				 System.exit(0);
+			 }
+		 });
+		 
+		 f.setVisible(true);
+		 
+		 component.mediaPlayer().media().play("video");
+    }
 	
 }

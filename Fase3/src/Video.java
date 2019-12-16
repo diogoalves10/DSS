@@ -22,6 +22,7 @@ public class Video {
 	public String get_categoria () {
 		return this.categoria;
 	}
+	
 
 	
 	public void set_name (String new_name) {
